@@ -19,7 +19,38 @@ model User {
   email       String    @unique
   password    String
   role        UserRole  @default(EMPLOYEE)
+  
+  tasks Task[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Task {
+  id           String         @id @default(uuid())
+
+  title        String
+  description  String?
+
+  status       TaskStatus     @default(TODO)
+  priority     TaskPriority   @default(MEDIUM)
+
+  dueDate      DateTime?
+
+  assignedToId String
+  assignedTo   User           @relation(fields: [assignedToId], references: [id])
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
