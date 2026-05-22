@@ -20,4 +20,10 @@ export class UsersService {
       data,
     });
   }
+  async updateUserRole(userId: string, role: any) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+  }
 }

@@ -1,12 +1,13 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    UseGuards,
-  } from '@nestjs/common';
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
   
   import { AuthGuard } from '@nestjs/passport';
   
@@ -14,12 +15,14 @@ import {
   
   import { CreateTaskDto } from './dto/create-task.dto';
   import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
+  import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
   
   @Controller('tasks')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   export class TasksController {
     constructor(private tasksService: TasksService) {}
-  
+    @Roles('ADMIN', 'MANAGER')
     @Post()
     createTask(
       @Body() createTaskDto: CreateTaskDto,
@@ -44,5 +47,42 @@ import {
         id,
         updateTaskStatusDto.status,
     );
+    }
+    @Get('my-tasks')
+    getMyTasks(@Request() req: any) {
+      return this.tasksService.getMyTasks(
+        req.user.id,
+      );
+    }
+
+    @Get('completed')
+    getCompletedTasks(
+      @Request() req: any,
+    ) {
+      return this.tasksService.getCompletedTasks(
+        req.user.id,
+      );
+    }
+
+    @Get('pending')
+    getPendingTasks(
+      @Request() req: any,
+    ) {
+      return this.tasksService.getPendingTasks(
+        req.user.id,
+      );
+    }
+
+    @Get('high-priority')
+    @Roles('ADMIN', 'MANAGER')
+    getHighPriorityTasks() {
+      return this.tasksService.getHighPriorityTasks();
+    }
+
+    @Get('stats')
+    getTaskStats(@Request() req: any) {
+      return this.tasksService.getTaskStats(
+        req.user.id,
+      );
     }
   }

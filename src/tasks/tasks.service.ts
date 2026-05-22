@@ -40,4 +40,75 @@ export class TasksService {
       },
     });
   }
+  async getMyTasks(userId: string) {
+    return this.prisma.task.findMany({
+      where: {
+        assignedToId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  
+  async getCompletedTasks(userId: string) {
+    return this.prisma.task.findMany({
+      where: {
+        assignedToId: userId,
+        status: 'DONE',
+      },
+    });
+  }
+  
+  async getPendingTasks(userId: string) {
+    return this.prisma.task.findMany({
+      where: {
+        assignedToId: userId,
+        status: {
+          not: 'DONE',
+        },
+      },
+    });
+  }
+  
+  async getHighPriorityTasks() {
+    return this.prisma.task.findMany({
+      where: {
+        priority: 'HIGH',
+      },
+    });
+  }
+  
+  async getTaskStats(userId: string) {
+    const totalTasks =
+      await this.prisma.task.count({
+        where: {
+          assignedToId: userId,
+        },
+      });
+  
+    const completedTasks =
+      await this.prisma.task.count({
+        where: {
+          assignedToId: userId,
+          status: 'DONE',
+        },
+      });
+  
+    const pendingTasks =
+      await this.prisma.task.count({
+        where: {
+          assignedToId: userId,
+          status: {
+            not: 'DONE',
+          },
+        },
+      });
+  
+    return {
+      totalTasks,
+      completedTasks,
+      pendingTasks,
+    };
+  }
 }
